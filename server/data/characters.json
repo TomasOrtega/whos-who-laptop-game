@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "name": "Alice",
+    "image": "/images/alice.png",
+    "description": "A friendly character with a hat."
+  },
+  {
+    "id": 2,
+    "name": "Bob",
+    "image": "/images/bob.png",
+    "description": "A tall character wearing glasses."
+  },
+  {
+    "id": 3,
+    "name": "Cindy",
+    "image": "/images/cindy.png",
+    "description": "Loves reading and has curly hair."
+  },
+  {
+    "id": 4,
+    "name": "Dan",
+    "image": "/images/dan.png",
+    "description": "Always smiling, wears a blue jacket."
+  },
+  {
+    "id": 5,
+    "name": "Eve",
+    "image": "/images/eve.png",
+    "description": "Wavy brown hair, often wears headphones."
+  }
+]

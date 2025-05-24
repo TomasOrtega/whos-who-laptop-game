@@ -1,0 +1,22 @@
+{
+  "name": "whos-who-laptop-game",
+  "version": "1.0.0",
+  "description": "A local-network 'Who's Who?' style board game with Node.js and Express",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "jest --coverage",
+    "doc": "jsdoc -c jsdoc.config.json"
+  },
+  "keywords": [],
+  "author": "Tomas Ortega",
+  "license": "GNU GPLv3",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "supertest": "^6.0.0",
+    "jsdoc": "^3.6.11"
+  }
+}
