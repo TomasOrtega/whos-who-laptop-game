@@ -1,119 +1,121 @@
 // client/js/game.js
+
 window.Game = (function () {
+  let currentPlayerName = null;
+
   /**
-   * Renders the main game board (all characters).
-   * Expects data = { board, player, mysteryCharacter }
+   * Fetches the current player state from the server and re-renders the board + mystery.
    */
-  function renderGameBoard(playerState) {
-    const container = document.getElementById('game-container');
-    container.innerHTML = '';
+  async function refetchAndRenderBoard() {
+    if (!currentPlayerName) return;
 
-    if (!playerState || !playerState.board) {
-      container.textContent = 'No active game board.';
-      return;
+    try {
+      const res = await fetch(`/api/game/state?playerName=${currentPlayerName}`);
+      if (!res.ok) throw new Error('Failed to fetch player state after move.');
+      const data = await res.json();
+
+      // Render the board and the mystery character
+      renderGameBoard(currentPlayerName, data.board);
+      renderMysteryCharacter(data.mysteryCharacter);
+    } catch (err) {
+      console.error(err);
+      const container = document.getElementById('game-container');
+      if (container) container.textContent = 'Error updating board state.';
     }
-
-    const boardDiv = document.createElement('div');
-    boardDiv.classList.add('game-board');
-
-    playerState.board.forEach((charObj) => {
-      const cardDiv = document.createElement('div');
-      cardDiv.classList.add('card');
-
-      // Clear textContent so we can build the child elements
-      cardDiv.textContent = '';
-
-      // 1) Character name
-      const nameEl = document.createElement('p');
-      nameEl.textContent = charObj.name || 'Unknown Character';
-      cardDiv.appendChild(nameEl);
-
-      // 2) Character image (if available)
-      if (charObj.image) {
-        const img = document.createElement('img');
-        img.src = charObj.image;
-        // Some style or dimension constraints if needed:
-        // img.style.width = '80px';
-        // img.style.height = 'auto';
-        cardDiv.appendChild(img);
-      }
-
-      cardDiv.addEventListener('click', () => {
-        // Change the clicked card's background color.
-        if (cardDiv.style.backgroundColor === 'gray') {
-          cardDiv.style.backgroundColor = ''; // Reset to default
-        } else {
-          cardDiv.style.backgroundColor = 'gray'; // Set to gray
-        }
-
-        // Proceed with sending the move to the backend.
-        guessCharacter(playerState.player.id, charObj.id);
-      });
-
-      boardDiv.appendChild(cardDiv);
-    });
-
-    container.appendChild(boardDiv);
   }
 
   /**
-   * Renders this player's mystery character at the bottom.
+   * Renders the main game board for the specified player’s data.
+   * Clicking a character toggles its "isGrayedOut" state on the server,
+   * then we re-fetch the updated board.
+   */
+  function renderGameBoard(playerName, board) {
+    currentPlayerName = playerName;
+    const container = document.getElementById('game-container');
+    container.innerHTML = '';
+
+    if (!board || board.length === 0) {
+      container.textContent = `No characters found for ${playerName}.`;
+      return;
+    }
+
+    board.forEach((charObj) => {
+      const cardDiv = document.createElement('div');
+      cardDiv.classList.add('card');
+
+      // Display name text
+      const nameEl = document.createElement('p');
+      nameEl.textContent = charObj.name;
+      cardDiv.appendChild(nameEl);
+
+      // Optional: display character image
+      if (charObj.image) {
+        const img = document.createElement('img');
+        img.src = charObj.image;
+        cardDiv.appendChild(img);
+      }
+
+      // If it is already grayed out, apply gray.
+      if (charObj.isGrayedOut) {
+        cardDiv.style.backgroundColor = 'gray';
+      }
+
+      // On card click, toggle the gray-out state via the server.
+      cardDiv.addEventListener('click', async () => {
+        try {
+          // POST the move to the server, flipping isGrayedOut for this char.
+          const response = await fetch('/api/game/move', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ playerName, characterId: charObj.id })
+          });
+          const result = await response.json();
+          console.log(result.message || result.error);
+
+          // Re-fetch the entire board so the UI will update.
+          await refetchAndRenderBoard();
+        } catch (error) {
+          console.error('Move error', error);
+        }
+      });
+
+      container.appendChild(cardDiv);
+    });
+  }
+
+  /**
+   * Renders the player's "mystery" character, which is picked from the OTHER player's board.
    */
   function renderMysteryCharacter(mystery) {
     const mysteryContainer = document.getElementById('mystery-container');
-    mysteryContainer.innerHTML = '<h2>Your Mystery Character</h2>';
+    mysteryContainer.innerHTML = '<h2>Your Mystery (from opponent’s board)</h2>';
 
-    // If no mystery yet, display a note
     if (!mystery || !mystery.name) {
-      const noMystery = document.createElement('p');
-      noMystery.textContent = 'No mystery assigned yet.';
-      mysteryContainer.appendChild(noMystery);
+      const p = document.createElement('p');
+      p.textContent = 'No mystery assigned yet.';
+      mysteryContainer.appendChild(p);
       return;
     }
 
     const cardDiv = document.createElement('div');
-    cardDiv.classList.add('mystery-card');
+    cardDiv.classList.add('card');
 
-    // Clear textContent so we can build
-    cardDiv.textContent = '';
+    // Show the mystery name
+    const nameEl = document.createElement('h4');
+    nameEl.textContent = mystery.name;
+    cardDiv.appendChild(nameEl);
 
-    // Name
-    const nameHeader = document.createElement('h4');
-    nameHeader.textContent = mystery.name;
-    cardDiv.appendChild(nameHeader);
-
-    // Image
+    // Optional: show the mystery image
     if (mystery.image) {
       const img = document.createElement('img');
       img.src = mystery.image;
-      // optional sizing
-      // img.style.width = '100px';
       cardDiv.appendChild(img);
     }
 
     mysteryContainer.appendChild(cardDiv);
   }
 
-  /**
-   * Sends a guess to the backend that this charId is the player's own or opponent's mystery (depending on your rules).
-   */
-  async function guessCharacter(playerId, charId) {
-    try {
-      const response = await fetch('/api/game/move', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          playerId,
-          moveData: { characterId: charId }
-        })
-      });
-      const data = await response.json();
-      console.log(data.message || data.error || 'Move processed.');
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
+  // Expose our render methods to other scripts.
   return {
     renderGameBoard,
     renderMysteryCharacter

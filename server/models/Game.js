@@ -2,92 +2,94 @@
 const fs = require('fs');
 const path = require('path');
 
+/**
+ * A two-player "Who's Who?" game.
+ * Tomas has a board loaded from, e.g., client/images/tomas.
+ * Nora has a board loaded from, e.g., client/images/nora.
+ * Tomas's mystery is chosen from Nora's board; Nora's from Tomas's board.
+ */
+
 class Game {
   constructor() {
-    // Determine the images folder path.
-    const imagesDir = path.join(__dirname, '..', '..', 'client', 'images');
+    // 1. Read "tomas" images folder
+    const tomasImagesDir = path.join(__dirname, '..', '..', 'client', 'images', 'tomas');
+    let tomasFiles = fs.readdirSync(tomasImagesDir)
+      .filter(file => /\.(png|jpe?g|gif|svg)$/i.test(file))
+      .sort((a, b) => a.localeCompare(b));
 
-    // Read all files from the images directory.
-    let files = fs.readdirSync(imagesDir);
+    // 2. Read "nora" images folder
+    const noraImagesDir = path.join(__dirname, '..', '..', 'client', 'images', 'nora');
+    let noraFiles = fs.readdirSync(noraImagesDir)
+      .filter(file => /\.(png|jpe?g|gif|svg)$/i.test(file))
+      .sort((a, b) => a.localeCompare(b));
 
-    // Filter to include only typical image files.
-    files = files.filter(file => /\.(png|jpe?g|gif|svg)$/i.test(file));
+    // 3. Build Tomas's board
+    this.tomasBoard = tomasFiles.map((filename, index) => ({
+      id: index + 1,
+      name: path.basename(filename, path.extname(filename)),
+      image: `/images/tomas/${filename}`,
+      isGrayedOut: false
+    }));
 
-    // Sort the filenames in alphabetical order.
-    files.sort((a, b) => a.localeCompare(b));
+    // 4. Build Nora's board
+    this.noraBoard = noraFiles.map((filename, index) => ({
+      id: index + 1,
+      name: path.basename(filename, path.extname(filename)),
+      image: `/images/nora/${filename}`,
+      isGrayedOut: false
+    }));
 
-    // Create a characters array from the sorted files.
-    // Use the filename (without extension) as the "name"
-    // and assign the index+1 as the id.
-    this.characters = files.map((filename, index) => {
-      const name = path.basename(filename, path.extname(filename));
+    // 5. Mystery for Tomas → random pick from Nora’s board
+    this.tomasMystery = this.noraBoard[
+      Math.floor(Math.random() * this.noraBoard.length)
+    ];
+
+    // 6. Mystery for Nora → random pick from Tomas’s board
+    this.noraMystery = this.tomasBoard[
+      Math.floor(Math.random() * this.tomasBoard.length)
+    ];
+  }
+
+  /**
+   * Returns the board (Tomas's or Nora's) plus that player’s mystery.
+   * @param {string} playerName - either "Tomas" or "Nora"
+   */
+  getPlayerState(playerName) {
+    if (playerName === 'Tomas') {
       return {
-        id: index + 1, // alphabetical order
-        name,
-        image: `/images/${filename}`, // since client folder is served statically
-        description: "" // you might leave description blank or add default text
+        board: this.tomasBoard,
+        mysteryCharacter: this.tomasMystery
       };
-    });
-
-    // Everything else remains similar.
-    this.board = this.characters.slice();
-    this.players = [];
-    this.playerMysteries = {};
-  }
-
-  /**
-   * Registers a new player and assigns the player a random "mystery" from the board.
-   */
-  addPlayer(player) {
-    this.players.push(player);
-    const randomIndex = Math.floor(Math.random() * this.board.length);
-    this.playerMysteries[player.id] = this.board[randomIndex];
-  }
-
-  /**
-   * Returns publicly visible state (board plus minimal player info).
-   */
-  getState() {
-    return {
-      board: this.board,
-      players: this.players.map(p => ({
-        id: p.id,
-        name: p.name
-      }))
-    };
-  }
-
-  /**
-   * Returns the state for a specific player, including their personal mystery.
-   */
-  getPlayerState(playerId) {
-    const player = this.players.find(p => p.id === playerId);
-    if (!player) {
-      throw new Error(`Player with ID ${playerId} not found.`);
+    } else if (playerName === 'Nora') {
+      return {
+        board: this.noraBoard,
+        mysteryCharacter: this.noraMystery
+      };
     }
-    return {
-      board: this.board,
-      player: {
-        id: player.id,
-        name: player.name
-      },
-      mysteryCharacter: this.playerMysteries[player.id] || null
-    };
+    throw new Error(`Unknown player "${playerName}"`);
   }
 
   /**
-   * Processes a move made by a player.
+   * Grays out a character on the provided player's own board.
+   * For example, if "Tomas" clicks ID=2, we mark ID=2 on Tomas's board as gray.
+   * @param {string} playerName - "Tomas" or "Nora"
+   * @param {number} characterId - ID of the character on that player's board
    */
-  handleMove(playerId, moveData) {
-    const { characterId } = moveData;
-    if (typeof characterId !== 'number') {
-      throw new Error('Invalid or missing characterId.');
+  handleMove(playerName, characterId) {
+    let board;
+    if (playerName === 'Tomas') {
+      board = this.tomasBoard;
+    } else if (playerName === 'Nora') {
+      board = this.noraBoard;
+    } else {
+      throw new Error(`Invalid player name: ${playerName}`);
     }
-    const mystery = this.playerMysteries[playerId];
-    if (!mystery) {
-      throw new Error(`No mystery assigned for player ${playerId}.`);
+
+    const charObj = board.find(c => c.id === characterId);
+    if (!charObj) {
+      throw new Error(`Character ${characterId} not found on ${playerName}'s board.`);
     }
-    console.log(`Player ${playerId} clicked: ID ${characterId}.`);
+    charObj.isGrayedOut = !charObj.isGrayedOut; // Flip the isGrayedOut flag
   }
 }
 

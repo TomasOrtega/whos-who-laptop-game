@@ -3,19 +3,16 @@ const express = require('express');
 const router = express.Router();
 const gameController = require('../controllers/gameController');
 
-// Create a new game
+// Create the 2-player game
 router.post('/game/create', gameController.createGame);
 
-// Get the shared game board (no personal mystery info)
-router.get('/game/state', gameController.getGameState);
+// For Tomas or Nora's board+state
+// e.g. GET /api/game/state?playerName=Tomas
+// or    GET /api/game/state/player/Nora
+router.get('/game/state', gameController.getPlayerState);
+router.get('/game/state/player/:playerName', gameController.getPlayerState);
 
-// Get state for a specific player (including their unique mystery)
-router.get('/game/state/player/:playerId', gameController.getGameStateForPlayer);
-
-// Join a game
-router.post('/game/join', gameController.joinGame);
-
-// Make a move
+// Make a move (gray out a card)
 router.post('/game/move', gameController.makeMove);
 
 module.exports = router;
