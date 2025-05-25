@@ -1,14 +1,33 @@
-name: Build & Test & Docs
+name: Build & Test & Docs & Deploy
 
 on:
   push:
     branches: [ "main", "master" ]
   pull_request:
     branches: [ "main", "master" ]
+  # Allows manual runs from the Actions tab
+  workflow_dispatch:
+
+# We need these permissions for GitHub Pages deployments.
+permissions:
+  contents: read      # Allows reading repository contents
+  pages: write        # Allows publishing to GitHub Pages
+  id-token: write     # Needed for OIDC authentication to Pages
+
+# Prevent multiple deployments from clashing.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
-  build-test-docs:
+  build-test-docs-deploy:
     runs-on: ubuntu-latest
+
+    # This sets the environment name (optional) and references the final page_url output
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -30,15 +49,17 @@ jobs:
       - name: Generate documentation
         run: npm run doc
 
-      - name: Upload docs artifact
-        uses: actions/upload-artifact@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Documentation Artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: jsdoc-documentation
           path: docs
 
-      # Optionally, if you want to deploy docs to GitHub Pages, uncomment:
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Display Deployed URL
+        run: echo "Deployed to ${{ steps.deployment.outputs.page_url }}"
