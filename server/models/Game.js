@@ -1,95 +1,120 @@
 // server/models/Game.js
+
 const fs = require('fs');
 const path = require('path');
 
 /**
  * A two-player "Who's Who?" game.
- * Tomas has a board loaded from, e.g., client/images/tomas.
- * Nora has a board loaded from, e.g., client/images/nora.
- * Tomas's mystery is chosen from Nora's board; Nora's from Tomas's board.
+ * Tomas has a board loaded from client/images/tomas.
+ * Nora has a board loaded from client/images/nora.
+ * Tomas’s mystery is chosen from Nora’s board; Nora’s from Tomas’s board.
  */
-
 class Game {
+  // Private fields (Node.js 14+ with --harmony-private-fields or Node 16+)
+  #tomasBoard;
+  #noraBoard;
+  #tomasMystery;
+  #noraMystery;
+
   constructor() {
-    // 1. Read "tomas" images folder
-    const tomasImagesDir = path.join(__dirname, '..', '..', 'client', 'images', 'tomas');
-    let tomasFiles = fs.readdirSync(tomasImagesDir)
-      .filter(file => /\.(png|jpe?g|gif|svg)$/i.test(file))
-      .sort((a, b) => a.localeCompare(b));
+    // Build both boards
+    this.#tomasBoard = this.#buildBoard('tomas');
+    this.#noraBoard = this.#buildBoard('nora');
 
-    // 2. Read "nora" images folder
-    const noraImagesDir = path.join(__dirname, '..', '..', 'client', 'images', 'nora');
-    let noraFiles = fs.readdirSync(noraImagesDir)
-      .filter(file => /\.(png|jpe?g|gif|svg)$/i.test(file))
-      .sort((a, b) => a.localeCompare(b));
-
-    // 3. Build Tomas's board
-    this.tomasBoard = tomasFiles.map((filename, index) => ({
-      id: index + 1,
-      name: path.basename(filename, path.extname(filename)),
-      image: `/images/tomas/${filename}`,
-      isGrayedOut: false
-    }));
-
-    // 4. Build Nora's board
-    this.noraBoard = noraFiles.map((filename, index) => ({
-      id: index + 1,
-      name: path.basename(filename, path.extname(filename)),
-      image: `/images/nora/${filename}`,
-      isGrayedOut: false
-    }));
-
-    // 5. Mystery for Tomas → random pick from Nora’s board
-    this.tomasMystery = this.noraBoard[
-      Math.floor(Math.random() * this.noraBoard.length)
-    ];
-
-    // 6. Mystery for Nora → random pick from Tomas’s board
-    this.noraMystery = this.tomasBoard[
-      Math.floor(Math.random() * this.tomasBoard.length)
-    ];
+    // Assign each player's mystery from the *opposite* board
+    this.#tomasMystery = this.#pickMystery(this.#noraBoard);
+    this.#noraMystery = this.#pickMystery(this.#tomasBoard);
   }
 
   /**
-   * Returns the board (Tomas's or Nora's) plus that player’s mystery.
-   * @param {string} playerName - either "Tomas" or "Nora"
+   * Builds a board by reading image files from client/images/<playerFolder>.
+   * @param {string} playerFolder - "tomas" or "nora"
+   * @returns {Array} an array of character objects
+   */
+  #buildBoard(playerFolder) {
+    // Example: /.../client/images/tomas
+    const imagesDir = path.join(__dirname, '..', '..', 'client', 'images', playerFolder);
+
+    let files;
+    try {
+      // Read all images in the given subfolder
+      files = fs.readdirSync(imagesDir);
+    } catch (err) {
+      // If the folder doesn't exist or is unreadable, return an empty board
+      console.warn(`[Game] Warning: Could not read folder "${imagesDir}":`, err);
+      return [];
+    }
+
+    // Filter only typical image files, then sort them
+    files = files
+      .filter(file => /\.(png|jpe?g|gif|svg)$/i.test(file))
+      .sort((a, b) => a.localeCompare(b));
+
+    // Map them into board items
+    return files.map((filename, index) => ({
+      id: index + 1,
+      name: path.basename(filename, path.extname(filename)),
+      image: `/images/${playerFolder}/${filename}`,
+      isGrayedOut: false
+    }));
+  }
+
+  /**
+   * Randomly picks one character from the given board. Returns null if the board is empty.
+   * @param {Array} board - an array of character objects
+   */
+  #pickMystery(board) {
+    if (!board || board.length === 0) {
+      return null;
+    }
+    const randomIndex = Math.floor(Math.random() * board.length);
+    return board[randomIndex];
+  }
+
+  /**
+   * Returns { board, mysteryCharacter } for the requested player.
+   * @param {string} playerName - "Tomas" or "Nora"
    */
   getPlayerState(playerName) {
-    if (playerName === 'Tomas') {
-      return {
-        board: this.tomasBoard,
-        mysteryCharacter: this.tomasMystery
-      };
-    } else if (playerName === 'Nora') {
-      return {
-        board: this.noraBoard,
-        mysteryCharacter: this.noraMystery
-      };
+    switch (playerName) {
+      case 'Tomas':
+        return {
+          board: this.#tomasBoard,
+          mysteryCharacter: this.#tomasMystery
+        };
+      case 'Nora':
+        return {
+          board: this.#noraBoard,
+          mysteryCharacter: this.#noraMystery
+        };
+      default:
+        throw new Error(`Unknown player "${playerName}". Must be "Tomas" or "Nora".`);
     }
-    throw new Error(`Unknown player "${playerName}"`);
   }
 
   /**
-   * Grays out a character on the provided player's own board.
-   * For example, if "Tomas" clicks ID=2, we mark ID=2 on Tomas's board as gray.
+   * Toggles the isGrayedOut flag on a character in the player's own board.
+   * e.g., if "Tomas" clicks ID=2, we flip isGrayedOut for ID=2 on Tomas's board.
    * @param {string} playerName - "Tomas" or "Nora"
    * @param {number} characterId - ID of the character on that player's board
    */
   handleMove(playerName, characterId) {
     let board;
     if (playerName === 'Tomas') {
-      board = this.tomasBoard;
+      board = this.#tomasBoard;
     } else if (playerName === 'Nora') {
-      board = this.noraBoard;
+      board = this.#noraBoard;
     } else {
-      throw new Error(`Invalid player name: ${playerName}`);
+      throw new Error(`Invalid player name: "${playerName}"`);
     }
 
     const charObj = board.find(c => c.id === characterId);
     if (!charObj) {
       throw new Error(`Character ${characterId} not found on ${playerName}'s board.`);
     }
-    charObj.isGrayedOut = !charObj.isGrayedOut; // Flip the isGrayedOut flag
+
+    // Flip the isGrayedOut flag
+    charObj.isGrayedOut = !charObj.isGrayedOut;
   }
 }
 
