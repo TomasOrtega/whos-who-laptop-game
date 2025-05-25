@@ -1,15 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Who's Who? JSON Edition</title>
-  <link rel="stylesheet" href="./css/style.css" />
-</head>
-<body>
-  <h1>Who's Who?</h1>
-  <div id="game-container"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Who's Who? JSON Edition</title>
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Who's Who?</h1>
+    </header>
 
-  <script src="./js/game.js"></script>
-  <script src="./js/app.js"></script>
-</body>
+    <main>
+      <section id="mystery-container" class="mystery-section">
+        <!-- Mystery character information will be injected here -->
+      </section>
+
+      <section id="game-container" class="game-section">
+        <!-- Game board (grid of cards) will be rendered here -->
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; Who's Who? Game - For Nora's xmas</p>
+    </footer>
+
+    <script src="./js/game.js"></script>
+    <script src="./js/app.js"></script>
+  </body>
 </html>

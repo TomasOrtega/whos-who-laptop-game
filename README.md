@@ -1,6 +1,6 @@
 # Who's Who Laptop Game
 
-A local-network “Who's Who?” style board game built with Node.js, Express, and a simple HTML/CSS/JavaScript front-end. Users connect locally to play an interactive game where they guess and identify characters.
+A local-network “Who's Who?” style board game built with Node.js, Express, and a modern HTML/CSS/JavaScript front end. Users connect locally to play an interactive game in which they select characters while trying to guess others' mystery character.
 
 ## Table of Contents
 1. [Project Overview](#project-overview)  
@@ -10,52 +10,53 @@ A local-network “Who's Who?” style board game built with Node.js, Express, a
 5. [Testing](#testing)  
 6. [Documentation Generation](#documentation-generation)  
 7. [Continuous Integration (GitHub Actions)](#continuous-integration-github-actions)  
-8. [Additional Notes](#additional-notes)
+8. [New Features and Changes](#new-features-and-changes)
 
 ## Project Overview
-This application allows multiple players to join a “Who's Who?” style game over a local network. The server is built using Express, while the front end is plain HTML/CSS/JavaScript, enabling straightforward interactions without pushing data over the public internet.
 
-**Key Features**  
-- **Local-Only Server**: Binds to 127.0.0.1 or your private IP for LAN use.  
-- **Dynamic Game Sessions**: Create, join, and leave game sessions.  
-- **REST API**: Basic endpoints in Express to manage state.  
-- **Simple Test Suite**: Uses Jest for testing.  
-- **Automated Documentation**: Generates docs from JSDoc comments.  
-- **GitHub Actions**: CI pipeline for testing and doc generation.
+This application lets multiple players join a “Who’s Who?” game over a local network. The server is built on Express while the front end uses semantic HTML and a dedicated CSS file for its styling. Character information is generated automatically from the images inside of `client/images` (the filename minus extension is used for the character name, and the character IDs are determined by the alphabetical order of the images).
 
-## File Structure
+**Key Features**
+
+- **Dynamic Character Setup:** No more static JSON file! Character data is generated from images in the `client/images` folder.
+- **Semantic Front End:** HTML is organized using semantic tags (`header`, `main`, `section`, `footer`), while all visual design is centralized in the CSS.
+- **Local-Only Server:** By default, the server binds to `127.0.0.1` on port `3000`.  
+- **Responsive Design:** The use of a responsive meta viewport and a Google Font (Roboto) gives the application a modern look.
+- **REST API:** An Express-based API manages game state and player moves.
+- **Testing:** Uses Jest and Supertest with an included test suite.
+- **Automated Documentation:** JSDoc extracts documentation from the inline code.
+- **GitHub Actions:** A CI pipeline validates code updates, runs tests, and optionally generates documentation.
+
+## Repo Structure
 
 ```
 whos-who-laptop-game/
 ├── client/
-│   ├── index.html            # Main entry point of the web app
+│   ├── index.html            # Main entry point. Uses semantic tags and minimal markup.
 │   ├── css/
-│   │   └── style.css         # Styles
+│   │   └── style.css         # All styling applied here (including responsive layout, fonts, grid, etc.)
 │   └── js/
-│       ├── app.js            # Client-side application logic
-│       └── game.js           # Game-specific logic (board rendering, events)
+│       ├── app.js            # Client-side logic: joining the game, handling moves.
+│       └── game.js           # Game rendering logic; builds the board and mystery card.
 ├── server/
 │   ├── controllers/
-│   │   └── gameController.js # Handle game logic and route actions
-│   ├── data/
-│   │   └── characters.json   # Sample character data for the game
+│   │   └── gameController.js # Handles game actions and routes.
 │   ├── models/
-│   │   ├── Game.js           # Game object, state management
-│   │   └── Player.js         # Player object
+│   │   ├── Game.js           # Game state – now generates character data from image files.
+│   │   └── Player.js         # Player object.
 │   ├── routes/
-│   │   └── api.js            # Express routes for API endpoints
+│   │   └── api.js            # Express API routes.
 │   ├── utils/
-│   │   └── logger.js         # Logging utility
-│   └── index.js              # Application entry point (Express server)
+│   │   └── logger.js         # Logging utility.
+│   └── index.js              # Application entry point for the Express server.
 ├── tests/
-│   └── sample.test.js        # Example tests using Jest + Supertest
+│   └── sample.test.js        # Example tests using Jest and Supertest.
 ├── .github/
 │   └── workflows/
-│       └── ci.yml            # GitHub Actions pipeline
-├── docs/                     # (Created after documentation generation)
-├── jsdoc.config.json         # JSDoc configuration
-├── package.json              # NPM manifest
-└── README.md                 # Project documentation
+│       └── ci.yml            # GitHub Actions pipeline.
+├── jsdoc.config.json         # JSDoc configuration.
+├── package.json              # NPM manifest.
+└── README.md                 # Project documentation (this file).
 ```
 
 ## Getting Started
@@ -72,48 +73,38 @@ whos-who-laptop-game/
 
 ## Running Locally
 
-By default, the server will bind to `127.0.0.1` on port `3000`.  
+The server binds to `127.0.0.1` on port `3000` by default.
+
 1. **Start the Server**  
    ```bash
    npm start
    ```
-2. **Access the Web App**  
-   Open a browser and go to [http://127.0.0.1:3000/](http://127.0.0.1:3000/).  
-   You'll see the game's main page (`client/index.html`).  
-
-If you need to make the game available to other devices on your LAN, modify `server/index.js` to listen on your private IP (e.g., `192.168.x.x`) instead of `127.0.0.1`.
+2. **Open the Web App**  
+   Open your browser and visit [http://127.0.0.1:3000/](http://127.0.0.1:3000/).  
+   You will see the new, semantically structured HTML that displays the mystery (top portion) and the game board (grid of cards).  
+   
+   *Tip:* If you want your game accessible on your local network, update the listen address in `server/index.js`.
 
 ## Testing
 
-We use **Jest** and **Supertest** for testing. Tests live in the `tests/` folder.
-
-- **Run Tests**  
+Tests use **Jest** and **Supertest**.
+- **Run All Tests**  
   ```bash
   npm test
   ```
-- This command also generates coverage report by default (see the script in `package.json`).
+- A coverage report will also be generated.
 
 ## Documentation Generation
 
-We use **JSDoc** to autogenerate documentation from code comments:
+JSDoc is used to auto-generate documentation from inline comments:
 
-1. **Add JSDoc Comments**  
-   In your `.js` files, add JSDoc-style comments:
-   ```js
-   /**
-    * Starts a new Game instance.
-    * @param {Object} config - Configuration for the game.
-    */
-   function startGame(config) {
-     ...
-   }
-   ```
-
-2. **Generate Docs**  
+1. **Add JSDoc Comments:**  
+   Your code in the server-side JavaScript files make use of standard JSDoc comments.
+2. **Generate Documentation:**  
    ```bash
    npm run doc
    ```
-   This will create a `docs/` folder containing HTML documentation. Open `docs/index.html` in a web browser to read your automatically generated docs.
+   This creates a `docs/` folder containing HTML documentation. Open `docs/index.html` in your browser.
 
 ## Continuous Integration (GitHub Actions)
 
@@ -125,12 +116,5 @@ A sample GitHub Actions workflow is located in [`.github/workflows/ci.yml`](.git
 4. **(Optional) Upload Docs as Artifact** or deploy to GitHub Pages
 
 If you choose to deploy to GitHub Pages, you can adjust the `ci.yml` (see the commented “Deploy to GitHub Pages” step).
-
-## Additional Notes
-
-- **Security**: By binding to `127.0.0.1`, the server is not exposed publicly. Use a firewall or further network safeguards if you change to a LAN IP.  
-- **Logging**: Use `server/utils/logger.js` if you want to implement structured logs.
-- **Contributions**: Issues or pull requests are welcome!  
-- **License**: [Choose the license appropriate for your project.]
 
 _Enjoy playing your local “Who's Who?” game!_

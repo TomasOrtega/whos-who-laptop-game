@@ -3,16 +3,19 @@ const express = require('express');
 const router = express.Router();
 const gameController = require('../controllers/gameController');
 
-// POST to create a new game
+// Create a new game
 router.post('/game/create', gameController.createGame);
 
-// GET the current game state
+// Get the shared game board (no personal mystery info)
 router.get('/game/state', gameController.getGameState);
 
-// POST to join a game
+// Get state for a specific player (including their unique mystery)
+router.get('/game/state/player/:playerId', gameController.getGameStateForPlayer);
+
+// Join a game
 router.post('/game/join', gameController.joinGame);
 
-// POST a move
+// Make a move
 router.post('/game/move', gameController.makeMove);
 
 module.exports = router;

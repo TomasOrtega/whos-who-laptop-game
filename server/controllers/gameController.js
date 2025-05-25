@@ -3,7 +3,7 @@ const Game = require('../models/Game');
 const Player = require('../models/Player');
 
 /**
- * Creates a new game instance. This will load characters from JSON each time.
+ * Creates a new global game instance.
  */
 function createGame(req, res) {
   global.currentGame = new Game();
@@ -11,7 +11,7 @@ function createGame(req, res) {
 }
 
 /**
- * Returns the current game state or 404 if no game is found.
+ * Returns a global, shared state (everyone's board, but no personal mysteries).
  */
 function getGameState(req, res) {
   if (!global.currentGame) {
@@ -21,7 +21,30 @@ function getGameState(req, res) {
 }
 
 /**
- * Joins a player to the current game (an example method).
+ * Returns the game state specifically for a single player, including their unique mystery.
+ * If you want the playerId in the query (e.g. /api/game/state/player?playerId=...), do that.
+ * Alternatively, route param: /api/game/state/player/:playerId
+ */
+function getGameStateForPlayer(req, res) {
+  if (!global.currentGame) {
+    return res.status(404).json({ message: 'No active game found.' });
+  }
+
+  const playerId = req.params.playerId || req.query.playerId;
+  if (!playerId) {
+    return res.status(400).json({ message: 'playerId is required.' });
+  }
+
+  try {
+    const playerState = global.currentGame.getPlayerState(playerId);
+    return res.json(playerState);
+  } catch (error) {
+    return res.status(404).json({ message: error.message });
+  }
+}
+
+/**
+ * Joins a player to the current game.
  */
 function joinGame(req, res) {
   if (!global.currentGame) {
@@ -31,11 +54,11 @@ function joinGame(req, res) {
   const player = new Player(playerId, playerName);
   global.currentGame.addPlayer(player);
 
-  return res.json({ message: `Player ${playerName} joined.` });
+  return res.json({ message: `Player ${playerName} joined.`, playerId });
 }
 
 /**
- * Processes a move from a player, e.g. guessing a character, etc.
+ * Makes a move, e.g. guessing who the mystery character is.
  */
 function makeMove(req, res) {
   if (!global.currentGame) {
@@ -53,6 +76,7 @@ function makeMove(req, res) {
 module.exports = {
   createGame,
   getGameState,
+  getGameStateForPlayer,
   joinGame,
   makeMove
 };
