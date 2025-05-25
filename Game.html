@@ -30,10 +30,10 @@
     
         <h2><span class="attribs"><span class="type-signature"></span></span>Game<span class="signature">()</span><span class="type-signature"></span></h2>
         
-            <div class="class-description">A two-player "Who's Who?" game.
-Tomas has a board loaded from client/images/tomas.
-Nora has a board loaded from client/images/nora.
-Tomas’s mystery is chosen from Nora’s board; Nora’s from Tomas’s board.</div>
+            <div class="class-description">Represents a two-player "Who's Who?" game for Tomas and Nora.
+Each player has a board of character images, and a mystery character
+is chosen from the *other* player's board. A move toggles the 'isGrayedOut'
+flag on the player's own board.</div>
         
     
 </header>
@@ -54,6 +54,11 @@ Tomas’s mystery is chosen from Nora’s board; Nora’s from Tomas’s board.<
     
 
 
+
+<div class="description">
+    Constructs a new Game instance by building both Tomas's and Nora's boards,
+and then picking a random mystery character for each from the opposite board.
+</div>
 
 
 
@@ -96,7 +101,7 @@ Tomas’s mystery is chosen from Nora’s board; Nora’s from Tomas’s board.<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_Game.js.html">models/Game.js</a>, <a href="models_Game.js.html#line12">line 12</a>
+        <a href="server_models_Game.js.html">server/models/Game.js</a>, <a href="server_models_Game.js.html#line12">line 12</a>
     </li></ul></dd>
     
 
@@ -152,7 +157,7 @@ Tomas’s mystery is chosen from Nora’s board; Nora’s from Tomas’s board.<
     
 
     
-    <h4 class="name" id="getPlayerState"><span class="type-signature"></span>getPlayerState<span class="signature">(playerName)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="getPlayerState"><span class="type-signature"></span>getPlayerState<span class="signature">(playerName)</span><span class="type-signature"> &rarr; {Object}</span></h4>
     
 
     
@@ -160,7 +165,7 @@ Tomas’s mystery is chosen from Nora’s board; Nora’s from Tomas’s board.<
 
 
 <div class="description">
-    Returns { board, mysteryCharacter } for the requested player.
+    Retrieves the board and mystery character for the specified player.
 </div>
 
 
@@ -212,7 +217,7 @@ Tomas’s mystery is chosen from Nora’s board; Nora’s from Tomas’s board.<
 
             
 
-            <td class="description last">"Tomas" or "Nora"</td>
+            <td class="description last">The player's name: "Tomas" or "Nora".</td>
         </tr>
 
     
@@ -253,7 +258,7 @@ Tomas’s mystery is chosen from Nora’s board; Nora’s from Tomas’s board.<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_Game.js.html">models/Game.js</a>, <a href="models_Game.js.html#line78">line 78</a>
+        <a href="server_models_Game.js.html">server/models/Game.js</a>, <a href="server_models_Game.js.html#line113">line 113</a>
     </li></ul></dd>
     
 
@@ -276,8 +281,59 @@ Tomas’s mystery is chosen from Nora’s board; Nora’s from Tomas’s board.<
 
 
 
+<h5>Throws:</h5>
+
+        
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        If playerName is neither "Tomas" nor "Nora".
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
 
 
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+
+    
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    An object containing the player's board array and their mystery character.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -289,7 +345,7 @@ Tomas’s mystery is chosen from Nora’s board; Nora’s from Tomas’s board.<
     
 
     
-    <h4 class="name" id="handleMove"><span class="type-signature"></span>handleMove<span class="signature">(playerName, characterId)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="handleMove"><span class="type-signature"></span>handleMove<span class="signature">(playerName, characterId)</span><span class="type-signature"> &rarr; {void}</span></h4>
     
 
     
@@ -297,8 +353,8 @@ Tomas’s mystery is chosen from Nora’s board; Nora’s from Tomas’s board.<
 
 
 <div class="description">
-    Toggles the isGrayedOut flag on a character in the player's own board.
-e.g., if "Tomas" clicks ID=2, we flip isGrayedOut for ID=2 on Tomas's board.
+    Toggles the `isGrayedOut` flag for a character in the specified player's board.
+For example, if "Tomas" toggles ID=2, we flip `isGrayedOut` for ID=2 on Tomas's board.
 </div>
 
 
@@ -350,7 +406,7 @@ e.g., if "Tomas" clicks ID=2, we flip isGrayedOut for ID=2 on Tomas's board.
 
             
 
-            <td class="description last">"Tomas" or "Nora"</td>
+            <td class="description last">The player's name: "Tomas" or "Nora".</td>
         </tr>
 
     
@@ -373,7 +429,7 @@ e.g., if "Tomas" clicks ID=2, we flip isGrayedOut for ID=2 on Tomas's board.
 
             
 
-            <td class="description last">ID of the character on that player's board</td>
+            <td class="description last">The ID of the character to be toggled.</td>
         </tr>
 
     
@@ -414,7 +470,7 @@ e.g., if "Tomas" clicks ID=2, we flip isGrayedOut for ID=2 on Tomas's board.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_Game.js.html">models/Game.js</a>, <a href="models_Game.js.html#line101">line 101</a>
+        <a href="server_models_Game.js.html">server/models/Game.js</a>, <a href="server_models_Game.js.html#line139">line 139</a>
     </li></ul></dd>
     
 
@@ -437,8 +493,55 @@ e.g., if "Tomas" clicks ID=2, we flip isGrayedOut for ID=2 on Tomas's board.
 
 
 
+<h5>Throws:</h5>
+
+        
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        If the player name is invalid, or the character ID doesn’t exist on that board.
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
 
 
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+
+    
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">void</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -460,13 +563,13 @@ e.g., if "Tomas" clicks ID=2, we flip isGrayedOut for ID=2 on Tomas's board.
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Game.html">Game</a></li></ul><h3>Global</h3><ul><li><a href="global.html#createGame">createGame</a></li><li><a href="global.html#currentGame">currentGame</a></li><li><a href="global.html#getFirstLocalIPv4Address">getFirstLocalIPv4Address</a></li><li><a href="global.html#getPlayerState">getPlayerState</a></li><li><a href="global.html#logMessage">logMessage</a></li><li><a href="global.html#makeMove">makeMove</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Game.html">Game</a></li><li><a href="module-app.html">app</a></li></ul><h3>Classes</h3><ul><li><a href="Game.html">Game</a></li></ul><h3>Global</h3><ul><li><a href="global.html#createGame">createGame</a></li><li><a href="global.html#currentGame">currentGame</a></li><li><a href="global.html#getPlayerState">getPlayerState</a></li><li><a href="global.html#logMessage">logMessage</a></li><li><a href="global.html#makeMove">makeMove</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun May 25 2025 22:50:50 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun May 25 2025 23:30:16 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

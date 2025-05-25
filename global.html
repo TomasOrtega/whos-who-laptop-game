@@ -98,17 +98,30 @@
 
         
             
-<h4 class="name" id="currentGame"><span class="type-signature"></span>currentGame<span class="type-signature"></span></h4>
+<h4 class="name" id="currentGame"><span class="type-signature"></span>currentGame<span class="type-signature"> :<a href="Game.html">Game</a>|null</span></h4>
 
 
 
 
 <div class="description">
-    Global instance of the two-player game. 
-Call createGame() to reset.
+    Global instance of the two-player game.
+Call createGame() to reset it.
 </div>
 
 
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="Game.html">Game</a></span>
+|
+
+<span class="param-type">null</span>
+
+
+        </li>
+    </ul>
 
 
 
@@ -143,7 +156,7 @@ Call createGame() to reset.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controllers_gameController.js.html">controllers/gameController.js</a>, <a href="controllers_gameController.js.html#line8">line 8</a>
+        <a href="server_controllers_gameController.js.html">server/controllers/gameController.js</a>, <a href="server_controllers_gameController.js.html#line51">line 51</a>
     </li></ul></dd>
     
 
@@ -171,7 +184,7 @@ Call createGame() to reset.
     
 
     
-    <h4 class="name" id="createGame"><span class="type-signature"></span>createGame<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="createGame"><span class="type-signature"></span>createGame<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {void}</span></h4>
     
 
     
@@ -179,7 +192,7 @@ Call createGame() to reset.
 
 
 <div class="description">
-    Create a fresh two-player game for Tomas and Nora.
+    Creates (or resets) the two-player "Who's Who?" game for Tomas & Nora.
 </div>
 
 
@@ -190,92 +203,76 @@ Call createGame() to reset.
 
 
 
-
-
-
-
-<dl class="details">
-
+    <h5>Parameters:</h5>
     
 
-    
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
 
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controllers_gameController.js.html">controllers/gameController.js</a>, <a href="controllers_gameController.js.html#line13">line 13</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        <th>Type</th>
 
         
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>req</code></td>
             
 
-    
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#ExpressRequest">ExpressRequest</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The Express request object (no body needed).</td>
+        </tr>
 
     
-    <h4 class="name" id="getFirstLocalIPv4Address"><span class="type-signature"></span>getFirstLocalIPv4Address<span class="signature">()</span><span class="type-signature"> &rarr; {string|null}</span></h4>
-    
+
+        <tr>
+            
+                <td class="name"><code>res</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#ExpressResponse">ExpressResponse</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The Express response object.</td>
+        </tr>
 
     
-
-
-
-<div class="description">
-    Gets the first available external (non-internal) IPv4 address.
-</div>
-
-
-
-
-
-
-
+    </tbody>
+</table>
 
 
 
@@ -311,7 +308,7 @@ Call createGame() to reset.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line23">line 23</a>
+        <a href="server_controllers_gameController.js.html">server/controllers/gameController.js</a>, <a href="server_controllers_gameController.js.html#line53">line 53</a>
     </li></ul></dd>
     
 
@@ -340,7 +337,7 @@ Call createGame() to reset.
 
         
 <div class="param-desc">
-    The IPv4 address, or null if none found.
+    Sends an HTTP 201 status and JSON confirming game creation.
 </div>
 
 
@@ -351,10 +348,7 @@ Call createGame() to reset.
     </dt>
     <dd>
         
-<span class="param-type">string</span>
-|
-
-<span class="param-type">null</span>
+<span class="param-type">void</span>
 
 
     </dd>
@@ -365,6 +359,14 @@ Call createGame() to reset.
 
 
 
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// POST /api/game/create
+// No request body required.
+// Response:
+// { "message": "Game Created" }</code></pre>
+
+
 
         
             
@@ -372,7 +374,7 @@ Call createGame() to reset.
     
 
     
-    <h4 class="name" id="getPlayerState"><span class="type-signature"></span>getPlayerState<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="getPlayerState"><span class="type-signature"></span>getPlayerState<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {void}</span></h4>
     
 
     
@@ -380,9 +382,8 @@ Call createGame() to reset.
 
 
 <div class="description">
-    Get the board + mystery for either "Tomas" or "Nora".
-Expects ?playerName=Tomas or ?playerName=Nora or 
-route param /:playerName.
+    Retrieves the board + mystery character for either "Tomas" or "Nora".
+Expects a query string (?playerName=Tomas) or a route param (/api/game/state/player/Tomas).
 </div>
 
 
@@ -391,6 +392,78 @@ route param /:playerName.
 
 
 
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>req</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#ExpressRequest">ExpressRequest</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The Express request object.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>res</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#ExpressResponse">ExpressResponse</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The Express response object.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -426,7 +499,7 @@ route param /:playerName.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controllers_gameController.js.html">controllers/gameController.js</a>, <a href="controllers_gameController.js.html#line23">line 23</a>
+        <a href="server_controllers_gameController.js.html">server/controllers/gameController.js</a>, <a href="server_controllers_gameController.js.html#line72">line 72</a>
     </li></ul></dd>
     
 
@@ -451,8 +524,42 @@ route param /:playerName.
 
 
 
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Sends JSON with "board" and "mysteryCharacter", or an error.
+</div>
 
 
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">void</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// GET /api/game/state?playerName=Tomas
+// or GET /api/game/state/player/Nora
+//
+// Response:
+// {
+//   "board": [...],
+//   "mysteryCharacter": { ... }
+// }</code></pre>
 
 
 
@@ -462,7 +569,7 @@ route param /:playerName.
     
 
     
-    <h4 class="name" id="logMessage"><span class="type-signature"></span>logMessage<span class="signature">(message)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="logMessage"><span class="type-signature"></span>logMessage<span class="signature">(message)</span><span class="type-signature"> &rarr; {void}</span></h4>
     
 
     
@@ -470,7 +577,7 @@ route param /:playerName.
 
 
 <div class="description">
-    Logs a message with a timestamp.
+    Logs a message to the console with a timestamp in ISO format.
 </div>
 
 
@@ -522,7 +629,7 @@ route param /:playerName.
 
             
 
-            <td class="description last"></td>
+            <td class="description last">The message to log.</td>
         </tr>
 
     
@@ -563,7 +670,7 @@ route param /:playerName.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_logger.js.html">utils/logger.js</a>, <a href="utils_logger.js.html#line7">line 7</a>
+        <a href="server_utils_logger.js.html">server/utils/logger.js</a>, <a href="server_utils_logger.js.html#line9">line 9</a>
     </li></ul></dd>
     
 
@@ -588,6 +695,28 @@ route param /:playerName.
 
 
 
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    This function does not return anything.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">void</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -599,7 +728,7 @@ route param /:playerName.
     
 
     
-    <h4 class="name" id="makeMove"><span class="type-signature"></span>makeMove<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="makeMove"><span class="type-signature"></span>makeMove<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {void}</span></h4>
     
 
     
@@ -607,8 +736,8 @@ route param /:playerName.
 
 
 <div class="description">
-    Make a move: Gray out a character on the player's board.
-Body must include { playerName, characterId }
+    Toggles (flips) the isGrayedOut flag for a character in the specified player's board.
+The request body must include { "playerName": "Tomas|Nora", "characterId": <number> }.
 </div>
 
 
@@ -617,6 +746,78 @@ Body must include { playerName, characterId }
 
 
 
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>req</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#ExpressRequest">ExpressRequest</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The Express request object, providing "playerName" and "characterId".</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>res</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#ExpressResponse">ExpressResponse</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The Express response object.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -652,7 +853,7 @@ Body must include { playerName, characterId }
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controllers_gameController.js.html">controllers/gameController.js</a>, <a href="controllers_gameController.js.html#line44">line 44</a>
+        <a href="server_controllers_gameController.js.html">server/controllers/gameController.js</a>, <a href="server_controllers_gameController.js.html#line109">line 109</a>
     </li></ul></dd>
     
 
@@ -677,14 +878,399 @@ Body must include { playerName, characterId }
 
 
 
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Sends a JSON response confirming the move or reporting an error.
+</div>
 
 
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">void</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// POST /api/game/move
+// {
+//   "playerName": "Tomas",
+//   "characterId": 2
+// }
+//
+// Response:
+// {
+//   "message": "Move OK: Tomas grayed out ID 2."
+// }</code></pre>
 
 
 
         
     
 
+    
+        <h3 class="subsection-title">Type Definitions</h3>
+
+        
+                
+<h4 class="name" id="ExpressRequest">ExpressRequest</h4>
+
+
+
+
+<div class="description">
+    A placeholder typedef for an Express Request object.
+Add or remove properties as needed for your application.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>params</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The route parameters (e.g., req.params.playerName).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>query</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The query string parameters (e.g., req.query.playerName).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>body</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The parsed JSON body (e.g., req.body.playerName, req.body.characterId).</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="server_controllers_gameController.js.html">server/controllers/gameController.js</a>, <a href="server_controllers_gameController.js.html#line27">line 27</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="ExpressResponse">ExpressResponse</h4>
+
+
+
+
+<div class="description">
+    A placeholder typedef for an Express Response object.
+Add or remove properties as needed for your application.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>status</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Sets the HTTP status code (e.g., res.status(200)).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>json</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Sends a JSON response (e.g., res.json({ message: ... })).</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="server_controllers_gameController.js.html">server/controllers/gameController.js</a>, <a href="server_controllers_gameController.js.html#line37">line 37</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
     
 
     
@@ -698,13 +1284,13 @@ Body must include { playerName, characterId }
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Game.html">Game</a></li></ul><h3>Global</h3><ul><li><a href="global.html#createGame">createGame</a></li><li><a href="global.html#currentGame">currentGame</a></li><li><a href="global.html#getFirstLocalIPv4Address">getFirstLocalIPv4Address</a></li><li><a href="global.html#getPlayerState">getPlayerState</a></li><li><a href="global.html#logMessage">logMessage</a></li><li><a href="global.html#makeMove">makeMove</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Game.html">Game</a></li><li><a href="module-app.html">app</a></li></ul><h3>Classes</h3><ul><li><a href="Game.html">Game</a></li></ul><h3>Global</h3><ul><li><a href="global.html#createGame">createGame</a></li><li><a href="global.html#currentGame">currentGame</a></li><li><a href="global.html#getPlayerState">getPlayerState</a></li><li><a href="global.html#logMessage">logMessage</a></li><li><a href="global.html#makeMove">makeMove</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun May 25 2025 22:50:50 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun May 25 2025 23:30:16 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>
