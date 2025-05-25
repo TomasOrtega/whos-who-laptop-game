@@ -3,10 +3,12 @@
   "version": "1.0.0",
   "description": "A local-network 'Who's Who?' style board game with Node.js and Express",
   "main": "server/index.js",
+  "bin": "server/index.js",
   "scripts": {
     "start": "node server/index.js",
     "test": "jest --coverage",
-    "doc": "jsdoc -c jsdoc.config.json"
+    "doc": "jsdoc -c jsdoc.config.json",
+    "build:exe": "pkg . --out-path dist"
   },
   "keywords": [],
   "author": "Tomas Ortega",
@@ -17,6 +19,19 @@
   "devDependencies": {
     "jest": "^29.0.0",
     "jsdoc": "^4.0.4",
-    "supertest": "^6.0.0"
+    "supertest": "^6.0.0",
+    "pkg": "^5.8.0"
+  },
+  "pkg": {
+    "scripts": [
+      "server/**/*.js"
+    ],
+    "assets": [
+      "client/**/*"
+    ],
+    "targets": [
+      "node16-win-x64"
+    ],
+    "outputPath": "dist"
   }
 }
