@@ -34,11 +34,12 @@ main {
 
 /* Mystery Section Styling */
 .mystery-section {
-  margin-bottom: 30px;
+  margin: 0 auto 30px; /* top/bottom 0/30px, left/right auto for centering */
   padding: 20px;
   background-color: #fff;
   border: 2px dashed #ccc;
   text-align: center;
+  width: 25%;
 }
 
 /* Game Board Styling */
@@ -60,6 +61,18 @@ main {
   text-align: center;
   cursor: pointer;
   transition: background-color 0.3s ease;
+}
+
+.game-section .card img,
+.mystery-section .card img {
+  width: 100%;
+  /* let the image fill the card’s width */
+  height: auto;
+  /* keep its aspect ratio */
+  display: block;
+  /* remove extraneous inline spacing */
+  object-fit: cover;
+  /* optional if you fix a height and want cropping */
 }
 
 /* Visual feedback on hover */
@@ -89,7 +102,8 @@ footer {
 }
 
 .player-select-btn:hover {
-  background-color: #2952cc; /* Darker shade on hover */
+  background-color: #2952cc;
+  /* Darker shade on hover */
 }
 
 /* The container for the two buttons (center them horizontally) */
