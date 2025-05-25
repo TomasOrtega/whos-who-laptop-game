@@ -74,3 +74,26 @@ footer {
   background-color: #ddd;
   font-size: 0.9rem;
 }
+
+/* A nicer style for the player's selection buttons */
+.player-select-btn {
+  background-color: #4479ff;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 1rem;
+  padding: 12px 20px;
+  cursor: pointer;
+  margin: 0 10px;
+  transition: background-color 0.3s ease;
+}
+
+.player-select-btn:hover {
+  background-color: #2952cc; /* Darker shade on hover */
+}
+
+/* The container for the two buttons (center them horizontally) */
+#player-buttons {
+  margin: 20px auto;
+  text-align: center;
+}

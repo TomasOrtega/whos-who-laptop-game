@@ -2,27 +2,34 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Who's Who? JSON Edition</title>
+    <title>Who’s Who? Tomas & Nora</title>
     <link rel="stylesheet" href="./css/style.css" />
   </head>
   <body>
     <header>
-      <h1>Who's Who?</h1>
+      <h1>Who’s Who? (Tomas & Nora)</h1>
     </header>
 
     <main>
+      <!-- Mystery Container -->
       <section id="mystery-container" class="mystery-section">
-        <!-- Mystery character information will be injected here -->
+        <!-- Mystery card injected here -->
       </section>
 
+      <!-- Game Board Container -->
       <section id="game-container" class="game-section">
-        <!-- Game board (grid of cards) will be rendered here -->
+        <!-- Player’s board injected here -->
       </section>
+
+      <!-- Two player selection buttons, inside a single container -->
+      <div id="player-buttons">
+        <button id="tomas-button" class="player-select-btn">Play as Tomas</button>
+        <button id="nora-button" class="player-select-btn">Play as Nora</button>
+      </div>
     </main>
 
     <footer>
-      <p>&copy; Who's Who? Game - For Nora's xmas</p>
+      <p>Tomas & Nora's Who's Who?</p>
     </footer>
 
     <script src="./js/game.js"></script>
