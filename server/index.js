@@ -1,4 +1,5 @@
 // server/index.js
+
 const express = require('express');
 const path = require('path');
 const os = require('os');
@@ -6,19 +7,30 @@ const apiRoutes = require('./routes/api');
 
 const app = express();
 
+/**
+ * Configure Express to parse JSON bodies, URL-encoded data, and serve static files
+ * from the client directory.
+ */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '..', 'client')));
 
-// Mount your API routes
+/**
+ * Mount the application's API routes at /api.
+ */
 app.use('/api', apiRoutes);
 
-// Export for tests/docs
+/**
+ * The Express app instance, exported for use in tests or external scripts.
+ * @module app
+ */
 module.exports = app;
 
 /**
- * Gets the first available external (non-internal) IPv4 address.
- * @returns {string|null} The IPv4 address, or null if none found.
+ * Gets the first available external (non-internal) IPv4 address of the local machine.
+ *
+ * @function getFirstLocalIPv4Address
+ * @returns {string|null} The IPv4 address found, or null if none.
  */
 function getFirstLocalIPv4Address() {
   const interfaces = os.networkInterfaces();
@@ -35,6 +47,7 @@ function getFirstLocalIPv4Address() {
   return null;
 }
 
+// If this file is run directly (node server/index.js), start the server
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;
 

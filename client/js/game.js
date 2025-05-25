@@ -1,17 +1,30 @@
 // client/js/game.js
 
+/**
+ * The Game module exposes functions to render the board and the mystery character.
+ * @module Game
+ */
 window.Game = (function () {
+  /**
+   * The currently active player's name. Used when toggling the board UI.
+   * @type {string|null}
+   */
   let currentPlayerName = null;
 
   /**
-   * Fetches the current player state from the server and re-renders the board + mystery.
+   * Asynchronously fetches the current player's state from the server,
+   * then re-renders the updated board and mystery character.
+   * @returns {Promise<void>} A promise resolved once the board is fetched and rendered.
+   * @throws {Error} If the request fails or the server response is not OK.
    */
   async function refetchAndRenderBoard() {
     if (!currentPlayerName) return;
 
     try {
       const res = await fetch(`/api/game/state?playerName=${currentPlayerName}`);
-      if (!res.ok) throw new Error('Failed to fetch player state after move.');
+      if (!res.ok) {
+        throw new Error('Failed to fetch player state after move.');
+      }
       const data = await res.json();
 
       // Render the board and the mystery character
@@ -25,9 +38,12 @@ window.Game = (function () {
   }
 
   /**
-   * Renders the main game board for the specified player’s data.
-   * Clicking a character toggles its "isGrayedOut" state on the server,
-   * then we re-fetch the updated board.
+   * Renders the game board UI for the specified player.
+   * - Displays a list of character cards.
+   * - Clicking a card toggles its "isGrayedOut" state on the server, then re-fetches the board.
+   * @param {string} playerName - The name of the current player ("Tomas" or "Nora").
+   * @param {Array<Object>} board - The array of character objects to render.
+   * @returns {void}
    */
   function renderGameBoard(playerName, board) {
     currentPlayerName = playerName;
@@ -48,22 +64,21 @@ window.Game = (function () {
       nameEl.textContent = charObj.name;
       cardDiv.appendChild(nameEl);
 
-      // Optional: display character image
+      // Display character image (if available)
       if (charObj.image) {
         const img = document.createElement('img');
         img.src = charObj.image;
         cardDiv.appendChild(img);
       }
 
-      // If it is already grayed out, apply gray.
+      // Apply gray background if isGrayedOut is true
       if (charObj.isGrayedOut) {
         cardDiv.style.backgroundColor = 'gray';
       }
 
-      // On card click, toggle the gray-out state via the server.
+      // On card click, send a move request to the server to flip the gray-out state
       cardDiv.addEventListener('click', async () => {
         try {
-          // POST the move to the server, flipping isGrayedOut for this char.
           const response = await fetch('/api/game/move', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -72,7 +87,7 @@ window.Game = (function () {
           const result = await response.json();
           console.log(result.message || result.error);
 
-          // Re-fetch the entire board so the UI will update.
+          // Re-fetch the entire board so the UI updates
           await refetchAndRenderBoard();
         } catch (error) {
           console.error('Move error', error);
@@ -84,7 +99,10 @@ window.Game = (function () {
   }
 
   /**
-   * Renders the player's "mystery" character, which is picked from the OTHER player's board.
+   * Renders the mystery character for the current player.
+   * The mystery character is chosen from the *other* player's board.
+   * @param {Object} mystery - The mystery character object with "name" and optional "image" properties.
+   * @returns {void}
    */
   function renderMysteryCharacter(mystery) {
     const mysteryContainer = document.getElementById('mystery-container');
@@ -115,7 +133,7 @@ window.Game = (function () {
     mysteryContainer.appendChild(cardDiv);
   }
 
-  // Expose our render methods to other scripts.
+  // Return our public methods under window.Game
   return {
     renderGameBoard,
     renderMysteryCharacter

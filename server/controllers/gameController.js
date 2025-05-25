@@ -2,13 +2,20 @@
 const Game = require('../models/Game');
 
 /**
- * Global instance of the two-player game. 
- * Call createGame() to reset.
+ * A global instance of the two-player game.
+ * Call createGame() to reset it.
+ * @type {Game|null}
  */
 let currentGame = null;
 
 /**
- * Create a fresh two-player game for Tomas and Nora.
+ * Creates (or resets) the two-player Who's Who game and
+ * stores the instance in the global `currentGame`.
+ *
+ * @function createGame
+ * @param {import('express').Request} req - The Express HTTP request object.
+ * @param {import('express').Response} res - The Express HTTP response object.
+ * @returns {void} Sends a JSON response with status 201 on success.
  */
 function createGame(req, res) {
   currentGame = new Game();
@@ -16,14 +23,24 @@ function createGame(req, res) {
 }
 
 /**
- * Get the board + mystery for either "Tomas" or "Nora".
- * Expects ?playerName=Tomas or ?playerName=Nora or 
- * route param /:playerName.
+ * Retrieves the state (board + mystery) for a specified player ("Tomas" or "Nora").
+ * - Expects a query string `?playerName=` or a route param `/:playerName`.
+ *
+ * @function getPlayerState
+ * @param {import('express').Request} req - The Express HTTP request object.
+ * @param {import('express').Response} res - The Express HTTP response object.
+ * @returns {void} Sends a JSON response containing the player's board and mystery character.
+ *
+ * @example
+ * GET /api/game/state?playerName=Tomas
+ * // or
+ * GET /api/game/state/Nora
  */
 function getPlayerState(req, res) {
   if (!currentGame) {
     return res.status(404).json({ message: 'No active game found.' });
   }
+
   const playerName = req.params.playerName || req.query.playerName;
   if (!playerName) {
     return res.status(400).json({ message: 'playerName is required (Tomas/Nora).' });
@@ -38,13 +55,26 @@ function getPlayerState(req, res) {
 }
 
 /**
- * Make a move: Gray out a character on the player's board.
- * Body must include { playerName, characterId }
+ * Toggles the gray-out (eliminate) state for a character on the specified player's board.
+ * - Requires a JSON body: { "playerName": "Tomas|Nora", "characterId": 3 }
+ *
+ * @function makeMove
+ * @param {import('express').Request} req - The Express HTTP request object.
+ * @param {import('express').Response} res - The Express HTTP response object.
+ * @returns {void} Sends a JSON response confirming the move on success.
+ *
+ * @example
+ * POST /api/game/move
+ * {
+ *   "playerName": "Tomas",
+ *   "characterId": 2
+ * }
  */
 function makeMove(req, res) {
   if (!currentGame) {
     return res.status(400).json({ message: 'No active game found.' });
   }
+
   const { playerName, characterId } = req.body;
   if (!playerName || typeof characterId !== 'number') {
     return res.status(400).json({ message: 'playerName and numeric characterId are required.' });
