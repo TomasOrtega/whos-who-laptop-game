@@ -36,7 +36,7 @@ In this two-player “Who’s Who?” game:
 ## Gameplay and Mechanics
 
 1. **Player Identity**  
-   When the browser loads, you are prompted: “Are you Tomas or Nora?”  
+   When the browser loads, you select to play either as Tomas or Nora.  
    If you choose “Tomas,” you see your personal board from `client/images/tomas`. If you choose “Nora,” you see `client/images/nora`.  
 
 2. **Mystery Character**  
@@ -105,7 +105,7 @@ whos-who-laptop-game/
 
 2. **Open in Your Browser**  
    e.g. http://localhost:3000/  
-   - You’ll be prompted "Are you Tomas or Nora?"  
+   - You’ll be asked to play either as Tomas or Nora.  
    - The game then loads your board and your opponent’s mystery.  
 
 Because it’s a two-player game, you can open two browser windows (one as Tomas, one as Nora), or two separate machines on the same network.
