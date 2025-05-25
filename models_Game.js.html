@@ -27,95 +27,122 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>// server/models/Game.js
+
 const fs = require('fs');
 const path = require('path');
 
+/**
+ * A two-player "Who's Who?" game.
+ * Tomas has a board loaded from client/images/tomas.
+ * Nora has a board loaded from client/images/nora.
+ * Tomas’s mystery is chosen from Nora’s board; Nora’s from Tomas’s board.
+ */
 class Game {
+  // Private fields (Node.js 14+ with --harmony-private-fields or Node 16+)
+  #tomasBoard;
+  #noraBoard;
+  #tomasMystery;
+  #noraMystery;
+
   constructor() {
-    // Determine the images folder path.
-    const imagesDir = path.join(__dirname, '..', '..', 'client', 'images');
+    // Build both boards
+    this.#tomasBoard = this.#buildBoard('tomas');
+    this.#noraBoard = this.#buildBoard('nora');
 
-    // Read all files from the images directory.
-    let files = fs.readdirSync(imagesDir);
-
-    // Filter to include only typical image files.
-    files = files.filter(file => /\.(png|jpe?g|gif|svg)$/i.test(file));
-
-    // Sort the filenames in alphabetical order.
-    files.sort((a, b) => a.localeCompare(b));
-
-    // Create a characters array from the sorted files.
-    // Use the filename (without extension) as the "name"
-    // and assign the index+1 as the id.
-    this.characters = files.map((filename, index) => {
-      const name = path.basename(filename, path.extname(filename));
-      return {
-        id: index + 1, // alphabetical order
-        name,
-        image: `/images/${filename}`, // since client folder is served statically
-        description: "" // you might leave description blank or add default text
-      };
-    });
-
-    // Everything else remains similar.
-    this.board = this.characters.slice();
-    this.players = [];
-    this.playerMysteries = {};
+    // Assign each player's mystery from the *opposite* board
+    this.#tomasMystery = this.#pickMystery(this.#noraBoard);
+    this.#noraMystery = this.#pickMystery(this.#tomasBoard);
   }
 
   /**
-   * Registers a new player and assigns the player a random "mystery" from the board.
+   * Builds a board by reading image files from client/images/&lt;playerFolder>.
+   * @param {string} playerFolder - "tomas" or "nora"
+   * @returns {Array} an array of character objects
    */
-  addPlayer(player) {
-    this.players.push(player);
-    const randomIndex = Math.floor(Math.random() * this.board.length);
-    this.playerMysteries[player.id] = this.board[randomIndex];
-  }
+  #buildBoard(playerFolder) {
+    // Example: /.../client/images/tomas
+    const imagesDir = path.join(__dirname, '..', '..', 'client', 'images', playerFolder);
 
-  /**
-   * Returns publicly visible state (board plus minimal player info).
-   */
-  getState() {
-    return {
-      board: this.board,
-      players: this.players.map(p => ({
-        id: p.id,
-        name: p.name
-      }))
-    };
-  }
-
-  /**
-   * Returns the state for a specific player, including their personal mystery.
-   */
-  getPlayerState(playerId) {
-    const player = this.players.find(p => p.id === playerId);
-    if (!player) {
-      throw new Error(`Player with ID ${playerId} not found.`);
+    let files;
+    try {
+      // Read all images in the given subfolder
+      files = fs.readdirSync(imagesDir);
+    } catch (err) {
+      // If the folder doesn't exist or is unreadable, return an empty board
+      console.warn(`[Game] Warning: Could not read folder "${imagesDir}":`, err);
+      return [];
     }
-    return {
-      board: this.board,
-      player: {
-        id: player.id,
-        name: player.name
-      },
-      mysteryCharacter: this.playerMysteries[player.id] || null
-    };
+
+    // Filter only typical image files, then sort them
+    files = files
+      .filter(file => /\.(png|jpe?g|gif|svg)$/i.test(file))
+      .sort((a, b) => a.localeCompare(b));
+
+    // Map them into board items
+    return files.map((filename, index) => ({
+      id: index + 1,
+      name: path.basename(filename, path.extname(filename)),
+      image: `/images/${playerFolder}/${filename}`,
+      isGrayedOut: false
+    }));
   }
 
   /**
-   * Processes a move made by a player.
+   * Randomly picks one character from the given board. Returns null if the board is empty.
+   * @param {Array} board - an array of character objects
    */
-  handleMove(playerId, moveData) {
-    const { characterId } = moveData;
-    if (typeof characterId !== 'number') {
-      throw new Error('Invalid or missing characterId.');
+  #pickMystery(board) {
+    if (!board || board.length === 0) {
+      return null;
     }
-    const mystery = this.playerMysteries[playerId];
-    if (!mystery) {
-      throw new Error(`No mystery assigned for player ${playerId}.`);
+    const randomIndex = Math.floor(Math.random() * board.length);
+    return board[randomIndex];
+  }
+
+  /**
+   * Returns { board, mysteryCharacter } for the requested player.
+   * @param {string} playerName - "Tomas" or "Nora"
+   */
+  getPlayerState(playerName) {
+    switch (playerName) {
+      case 'Tomas':
+        return {
+          board: this.#tomasBoard,
+          mysteryCharacter: this.#tomasMystery
+        };
+      case 'Nora':
+        return {
+          board: this.#noraBoard,
+          mysteryCharacter: this.#noraMystery
+        };
+      default:
+        throw new Error(`Unknown player "${playerName}". Must be "Tomas" or "Nora".`);
     }
-    console.log(`Player ${playerId} clicked: ID ${characterId}.`);
+  }
+
+  /**
+   * Toggles the isGrayedOut flag on a character in the player's own board.
+   * e.g., if "Tomas" clicks ID=2, we flip isGrayedOut for ID=2 on Tomas's board.
+   * @param {string} playerName - "Tomas" or "Nora"
+   * @param {number} characterId - ID of the character on that player's board
+   */
+  handleMove(playerName, characterId) {
+    let board;
+    if (playerName === 'Tomas') {
+      board = this.#tomasBoard;
+    } else if (playerName === 'Nora') {
+      board = this.#noraBoard;
+    } else {
+      throw new Error(`Invalid player name: "${playerName}"`);
+    }
+
+    const charObj = board.find(c => c.id === characterId);
+    if (!charObj) {
+      throw new Error(`Character ${characterId} not found on ${playerName}'s board.`);
+    }
+
+    // Flip the isGrayedOut flag
+    charObj.isGrayedOut = !charObj.isGrayedOut;
   }
 }
 
@@ -129,13 +156,13 @@ module.exports = Game;</code></pre>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Player.html">Player</a></li></ul><h3>Global</h3><ul><li><a href="global.html#createGame">createGame</a></li><li><a href="global.html#getFirstLocalIPv4Address">getFirstLocalIPv4Address</a></li><li><a href="global.html#getGameState">getGameState</a></li><li><a href="global.html#getGameStateForPlayer">getGameStateForPlayer</a></li><li><a href="global.html#joinGame">joinGame</a></li><li><a href="global.html#logMessage">logMessage</a></li><li><a href="global.html#makeMove">makeMove</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Game.html">Game</a></li></ul><h3>Global</h3><ul><li><a href="global.html#createGame">createGame</a></li><li><a href="global.html#currentGame">currentGame</a></li><li><a href="global.html#getFirstLocalIPv4Address">getFirstLocalIPv4Address</a></li><li><a href="global.html#getPlayerState">getPlayerState</a></li><li><a href="global.html#logMessage">logMessage</a></li><li><a href="global.html#makeMove">makeMove</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun May 25 2025 15:39:10 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun May 25 2025 18:18:25 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>
