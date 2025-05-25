@@ -10,21 +10,33 @@ const path = require('path');
  * flag on the player's own board.
  */
 class Game {
-  /** @type {Array<Object>} The board representing Tomas's characters. */
+  /**
+   * The board representing Tomas's characters.
+   * @type {Array<Object>}
+   */
   #tomasBoard;
 
-  /** @type {Array<Object>} The board representing Nora's characters. */
+  /**
+   * The board representing Nora's characters.
+   * @type {Array<Object>}
+   */
   #noraBoard;
 
-  /** @type {Object|null} Tomas's mystery character, chosen from Nora's board. */
+  /**
+   * Tomas's mystery character, chosen from Nora's board.
+   * @type {Object|null}
+   */
   #tomasMystery;
 
-  /** @type {Object|null} Nora's mystery character, chosen from Tomas's board. */
+  /**
+   * Nora's mystery character, chosen from Tomas's board.
+   * @type {Object|null}
+   */
   #noraMystery;
 
   /**
-   * Constructs a new Game instance by building both Tomas's and Nora's boards
-   * and picking a random mystery character for each from the opposite board.
+   * Constructs a new Game instance by building both Tomas's and Nora's boards,
+   * and then picking a random mystery character for each from the opposite board.
    */
   constructor() {
     // Build both boards
@@ -37,12 +49,12 @@ class Game {
   }
 
   /**
-   * Reads a subfolder under client/images/<playerFolder> and returns an array of
+   * Reads a subfolder under 'client/images/<playerFolder>' and returns an array of
    * character objects. Each character object includes:
    *   - id
    *   - name
    *   - image (URL path under /images/<playerFolder>)
-   *   - isGrayedOut = false by default
+   *   - isGrayedOut = false (by default)
    *
    * @private
    * @param {string} playerFolder - "tomas" or "nora"
@@ -77,8 +89,9 @@ class Game {
 
   /**
    * Randomly picks one character from the given board. Returns null if the board is empty.
+   *
    * @private
-   * @param {Array<Object>} board - The board array from which to pick a character.
+   * @param {Array<Object>} board - The array from which to pick a character.
    * @returns {Object|null} A random character object, or null if the board is empty.
    */
   #pickMystery(board) {
@@ -115,8 +128,8 @@ class Game {
   }
 
   /**
-   * Toggles the `isGrayedOut` flag for a character on the specified player's board.
-   * Example: If "Tomas" toggles ID=2, then we flip `isGrayedOut` for ID=2 on Tomas's board.
+   * Toggles the `isGrayedOut` flag for a character in the specified player's board.
+   * For example, if "Tomas" toggles ID=2, we flip `isGrayedOut` for ID=2 on Tomas's board.
    *
    * @param {string} playerName - The player's name: "Tomas" or "Nora".
    * @param {number} characterId - The ID of the character to be toggled.

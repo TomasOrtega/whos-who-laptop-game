@@ -1,21 +1,68 @@
 // server/controllers/gameController.js
+
+/**
+ * @fileoverview
+ * Defines controllers for creating a 2-player Who's Who game (Tomas & Nora),
+ * retrieving a given player's state (board + mystery), and making moves.
+ *
+ * @example
+ * // Create (or reset) a new game:
+ * POST /api/game/create
+ *
+ * // Retrieve a player's current board & mystery:
+ * GET /api/game/state?playerName=Tomas
+ * // or:
+ * GET /api/game/state/player/Nora
+ *
+ * // Make a move (toggle "isGrayedOut" on a character):
+ * POST /api/game/move
+ * {
+ *   "playerName": "Tomas",
+ *   "characterId": 2
+ * }
+ */
+
 const Game = require('../models/Game');
 
 /**
- * A global instance of the two-player game.
+ * A placeholder typedef for an Express Request object.
+ * Add or remove properties as needed for your application.
+ *
+ * @typedef {Object} ExpressRequest
+ * @property {Object} [params] - The route parameters (e.g., req.params.playerName).
+ * @property {Object} [query] - The query string parameters (e.g., req.query.playerName).
+ * @property {Object} [body] - The parsed JSON body (e.g., req.body.playerName, req.body.characterId).
+ */
+
+/**
+ * A placeholder typedef for an Express Response object.
+ * Add or remove properties as needed for your application.
+ *
+ * @typedef {Object} ExpressResponse
+ * @property {Function} status - Sets the HTTP status code (e.g., res.status(200)).
+ * @property {Function} json - Sends a JSON response (e.g., res.json({ message: ... })).
+ */
+
+/**
+ * Global instance of the two-player game.
  * Call createGame() to reset it.
  * @type {Game|null}
  */
 let currentGame = null;
 
 /**
- * Creates (or resets) the two-player Who's Who game and
- * stores the instance in the global `currentGame`.
+ * Creates (or resets) the two-player "Who's Who?" game for Tomas & Nora.
  *
  * @function createGame
- * @param {import('express').Request} req - The Express HTTP request object.
- * @param {import('express').Response} res - The Express HTTP response object.
- * @returns {void} Sends a JSON response with status 201 on success.
+ * @param {ExpressRequest} req - The Express request object (no body needed).
+ * @param {ExpressResponse} res - The Express response object.
+ * @returns {void} Sends an HTTP 201 status and JSON confirming game creation.
+ *
+ * @example
+ * // POST /api/game/create
+ * // No request body required.
+ * // Response:
+ * // { "message": "Game Created" }
  */
 function createGame(req, res) {
   currentGame = new Game();
@@ -23,18 +70,23 @@ function createGame(req, res) {
 }
 
 /**
- * Retrieves the state (board + mystery) for a specified player ("Tomas" or "Nora").
- * - Expects a query string `?playerName=` or a route param `/:playerName`.
+ * Retrieves the board + mystery character for either "Tomas" or "Nora".
+ * Expects a query string (?playerName=Tomas) or a route param (/api/game/state/player/Tomas).
  *
  * @function getPlayerState
- * @param {import('express').Request} req - The Express HTTP request object.
- * @param {import('express').Response} res - The Express HTTP response object.
- * @returns {void} Sends a JSON response containing the player's board and mystery character.
+ * @param {ExpressRequest} req - The Express request object.
+ * @param {ExpressResponse} res - The Express response object.
+ * @returns {void} Sends JSON with "board" and "mysteryCharacter", or an error.
  *
  * @example
- * GET /api/game/state?playerName=Tomas
- * // or
- * GET /api/game/state/Nora
+ * // GET /api/game/state?playerName=Tomas
+ * // or GET /api/game/state/player/Nora
+ * //
+ * // Response:
+ * // {
+ * //   "board": [...],
+ * //   "mysteryCharacter": { ... }
+ * // }
  */
 function getPlayerState(req, res) {
   if (!currentGame) {
@@ -55,20 +107,25 @@ function getPlayerState(req, res) {
 }
 
 /**
- * Toggles the gray-out (eliminate) state for a character on the specified player's board.
- * - Requires a JSON body: { "playerName": "Tomas|Nora", "characterId": 3 }
+ * Toggles (flips) the isGrayedOut flag for a character in the specified player's board.
+ * The request body must include { "playerName": "Tomas|Nora", "characterId": <number> }.
  *
  * @function makeMove
- * @param {import('express').Request} req - The Express HTTP request object.
- * @param {import('express').Response} res - The Express HTTP response object.
- * @returns {void} Sends a JSON response confirming the move on success.
+ * @param {ExpressRequest} req - The Express request object, providing "playerName" and "characterId".
+ * @param {ExpressResponse} res - The Express response object.
+ * @returns {void} Sends a JSON response confirming the move or reporting an error.
  *
  * @example
- * POST /api/game/move
- * {
- *   "playerName": "Tomas",
- *   "characterId": 2
- * }
+ * // POST /api/game/move
+ * // {
+ * //   "playerName": "Tomas",
+ * //   "characterId": 2
+ * // }
+ * //
+ * // Response:
+ * // {
+ * //   "message": "Move OK: Tomas grayed out ID 2."
+ * // }
  */
 function makeMove(req, res) {
   if (!currentGame) {
