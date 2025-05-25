@@ -101,6 +101,6 @@ A sample GitHub Actions workflow is located in [`.github/workflows/ci.yml`](.git
 3. **Generate Documentation**: `npm run doc`  
 4. **(Optional) Upload Docs as Artifact** or deploy to GitHub Pages
 
-If you choose to deploy to GitHub Pages, you can adjust the `ci.yml` (see the commented “Deploy to GitHub Pages” step).
+If you choose to deploy to GitHub Pages, you can adjust the `ci.yml` (see the “Deploy to GitHub Pages” step).
 
 _Enjoy playing your local “Who's Who?” game!_
