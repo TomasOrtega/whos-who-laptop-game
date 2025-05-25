@@ -16,25 +16,14 @@ A local-network “Who's Who?” style board game built with Node.js, Express, a
 
 This application lets multiple players join a “Who’s Who?” game over a local network. The server is built on Express while the front end uses semantic HTML and a dedicated CSS file for its styling. Character information is generated automatically from the images inside of `client/images` (the filename minus extension is used for the character name, and the character IDs are determined by the alphabetical order of the images).
 
-**Key Features**
-
-- **Dynamic Character Setup:** No more static JSON file! Character data is generated from images in the `client/images` folder.
-- **Semantic Front End:** HTML is organized using semantic tags (`header`, `main`, `section`, `footer`), while all visual design is centralized in the CSS.
-- **Local-Only Server:** By default, the server binds to `127.0.0.1` on port `3000`.  
-- **Responsive Design:** The use of a responsive meta viewport and a Google Font (Roboto) gives the application a modern look.
-- **REST API:** An Express-based API manages game state and player moves.
-- **Testing:** Uses Jest and Supertest with an included test suite.
-- **Automated Documentation:** JSDoc extracts documentation from the inline code.
-- **GitHub Actions:** A CI pipeline validates code updates, runs tests, and optionally generates documentation.
-
 ## Repo Structure
 
 ```
 whos-who-laptop-game/
 ├── client/
-│   ├── index.html            # Main entry point. Uses semantic tags and minimal markup.
+│   ├── index.html            # Main entry point.
 │   ├── css/
-│   │   └── style.css         # All styling applied here (including responsive layout, fonts, grid, etc.)
+│   │   └── style.css         # All styling applied here.
 │   └── js/
 │       ├── app.js            # Client-side logic: joining the game, handling moves.
 │       └── game.js           # Game rendering logic; builds the board and mystery card.
@@ -42,7 +31,7 @@ whos-who-laptop-game/
 │   ├── controllers/
 │   │   └── gameController.js # Handles game actions and routes.
 │   ├── models/
-│   │   ├── Game.js           # Game state – now generates character data from image files.
+│   │   ├── Game.js           # Game state; generates character data from image files.
 │   │   └── Player.js         # Player object.
 │   ├── routes/
 │   │   └── api.js            # Express API routes.
@@ -73,17 +62,14 @@ whos-who-laptop-game/
 
 ## Running Locally
 
-The server binds to `127.0.0.1` on port `3000` by default.
+The server binds to the first available external IP on port `3000` by default.
 
 1. **Start the Server**  
    ```bash
    npm start
    ```
 2. **Open the Web App**  
-   Open your browser and visit [http://127.0.0.1:3000/](http://127.0.0.1:3000/).  
-   You will see the new, semantically structured HTML that displays the mystery (top portion) and the game board (grid of cards).  
-   
-   *Tip:* If you want your game accessible on your local network, update the listen address in `server/index.js`.
+   Open your browser and visit the IP indicated by the server console.
 
 ## Testing
 
