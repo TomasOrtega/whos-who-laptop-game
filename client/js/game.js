@@ -88,7 +88,7 @@ window.Game = (function () {
    */
   function renderMysteryCharacter(mystery) {
     const mysteryContainer = document.getElementById('mystery-container');
-    mysteryContainer.innerHTML = '<h2>Your Mystery Character</h2>';
+    mysteryContainer.innerHTML = '<h4>Mystery Character</h4>';
 
     if (!mystery || !mystery.name) {
       const p = document.createElement('p');
