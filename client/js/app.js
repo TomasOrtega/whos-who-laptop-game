@@ -1,80 +1,81 @@
-// client/js/app.js
-
-/**
- * Immediately-Invoked Function Expression (IIFE)
- * that sets up the Who's Who game client logic.
- * @returns {void}
- */
-(function () {
-  /** 
-   * Holds the current player's name: "Tomas" or "Nora".
-   * @type {string|null}
-   */
+document.addEventListener('DOMContentLoaded', () => {
+  const playerButtons = document.getElementById('player-buttons');
+  const controls = document.getElementById('game-controls');
+  const board = document.getElementById('game-container');
+  const mystery = document.getElementById('mystery-container');
+  const status = document.getElementById('status');
   let playerName = null;
+  let busy = false;
+  let renderedState = '';
 
-  /**
-   * Asynchronously creates (or resets) the 2-player game on the server.
-   * @returns {Promise<void>} Resolves once the server confirms game creation.
-   * @throws {Error} If the server response is not OK.
-   */
-  async function createNewGame() {
-    const res = await fetch('/api/game/create', { method: 'POST' });
-    if (!res.ok) throw new Error('Failed to create 2-player game.');
-    console.log('Created a new 2-player game.');
+  async function request(url, options) {
+    const response = await fetch(url, options);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'The request failed. Please try again.');
+    return data;
   }
 
-  /**
-   * Fetches and renders the board + mystery character for the currently chosen player.
-   * @returns {Promise<void>} Resolves once the board/mystery data is fetched and rendered.
-   */
-  async function fetchAndRenderPlayerState() {
-    if (!playerName) return;  // If no player selected yet, do nothing.
-
+  async function run(action) {
+    if (busy) return;
+    busy = true;
+    document.querySelectorAll('#player-buttons button, #game-controls button')
+      .forEach(button => { button.disabled = true; });
+    board.setAttribute('aria-busy', 'true');
     try {
-      const res = await fetch(`/api/game/state?playerName=${playerName}`);
-      if (!res.ok) {
-        throw new Error(`Failed to fetch board for ${playerName}`);
-      }
-      const data = await res.json();
-
-      // Render board and mystery via global "Game" object
-      window.Game.renderGameBoard(playerName, data.board);
-      window.Game.renderMysteryCharacter(data.mysteryCharacter);
-    } catch (err) {
-      console.error('Error loading state:', err);
-      const container = document.getElementById('game-container');
-      if (container) {
-        container.textContent = `Error loading board for ${playerName}.`;
-      }
+      await action();
+      status.textContent = `Playing as ${playerName}.`;
+    } catch (error) {
+      status.textContent = error.message;
+    } finally {
+      busy = false;
+      document.querySelectorAll('#player-buttons button, #game-controls button')
+        .forEach(button => { button.disabled = false; });
+      board.setAttribute('aria-busy', 'false');
     }
   }
 
-  /**
-   * Sets up the DOM once the page is fully loaded:
-   *  1) Creates a new 2-player game on the server.
-   *  2) Finds the player selection buttons.
-   *  3) Listens for button clicks, sets the player, hides the buttons, and fetches their board.
-   */
-  document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Create/Reset the 2-player game up front
-    await createNewGame();
-
-    // 2. Grab references to the buttons & container
-    const tomasButton = document.getElementById('tomas-button');
-    const noraButton = document.getElementById('nora-button');
-    const playerBtnContainer = document.getElementById('player-buttons');
-
-    // 3. On button click, set the player, hide the buttons, and fetch that board
-    tomasButton.addEventListener('click', () => {
-      playerName = 'Tomas';
-      playerBtnContainer.style.display = 'none';
-      fetchAndRenderPlayerState();
+  async function refresh() {
+    const state = await request(`/api/game/state?playerName=${encodeURIComponent(playerName)}`);
+    const serialized = JSON.stringify(state);
+    if (serialized === renderedState) return;
+    const focusedId = document.activeElement?.dataset.characterId;
+    window.Game.renderGameBoard(playerName, state.board, characterId => run(async () => {
+      await request('/api/game/move', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playerName, characterId })
+      });
+      await refresh();
+    }));
+    board.querySelectorAll('.card').forEach((card, index) => {
+      card.dataset.characterId = state.board[index].id;
+      if (card.dataset.characterId === focusedId) card.focus();
     });
+    window.Game.renderMysteryCharacter(state.mysteryCharacter);
+    renderedState = serialized;
+  }
 
-    noraButton.addEventListener('click', () => {
-      playerName = 'Nora';
-      playerBtnContainer.style.display = 'none';
-      fetchAndRenderPlayerState();
+  for (const name of ['Tomas', 'Nora']) {
+    document.getElementById(`${name.toLowerCase()}-button`).addEventListener('click', () => run(async () => {
+      await request('/api/game/join', { method: 'POST' });
+      playerName = name;
+      await refresh();
+      playerButtons.hidden = true;
+      controls.hidden = false;
+      board.hidden = false;
+      mystery.hidden = false;
+    }));
+  }
+
+  document.getElementById('new-game-button').addEventListener('click', () => {
+    if (busy || !window.confirm('Start a new game for both players?')) return;
+    run(async () => {
+      await request('/api/game/create', { method: 'POST' });
+      await refresh();
     });
   });
-})();
+
+  window.setInterval(() => {
+    if (playerName && playerButtons.hidden) run(refresh);
+  }, 5000);
+});

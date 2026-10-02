@@ -1,158 +1,73 @@
-// server/models/Game.js
-
 const fs = require('fs');
 const path = require('path');
 
-/**
- * Represents a two-player "Who's Who?" game for Tomas and Nora.
- * Each player has a board of character images, and a mystery character
- * is chosen from the *other* player's board. A move toggles the 'isGrayedOut'
- * flag on the player's own board.
- */
+/** A two-player game with independent boards and mysteries from the opposite board. */
 class Game {
-  /**
-   * The board representing Tomas's characters.
-   * @type {Array<Object>}
-   */
-  #tomasBoard;
+  #players;
 
-  /**
-   * The board representing Nora's characters.
-   * @type {Array<Object>}
-   */
-  #noraBoard;
-
-  /**
-   * Tomas's mystery character, chosen from Nora's board.
-   * @type {Object|null}
-   */
-  #tomasMystery;
-
-  /**
-   * Nora's mystery character, chosen from Tomas's board.
-   * @type {Object|null}
-   */
-  #noraMystery;
-
-  /**
-   * Constructs a new Game instance by building both Tomas's and Nora's boards,
-   * and then picking a random mystery character for each from the opposite board.
-   */
   constructor() {
-    // Build both boards
-    this.#tomasBoard = this.#buildBoard('tomas');
-    this.#noraBoard = this.#buildBoard('nora');
-
-    // Assign each player's mystery from the opposite board
-    this.#tomasMystery = this.#pickMystery(this.#noraBoard);
-    this.#noraMystery = this.#pickMystery(this.#tomasBoard);
+    const tomas = this.#buildBoard('tomas');
+    const nora = this.#buildBoard('nora');
+    this.#players = {
+      Tomas: { board: tomas, mysteryCharacter: this.#pickMystery(nora) },
+      Nora: { board: nora, mysteryCharacter: this.#pickMystery(tomas) }
+    };
   }
 
-  /**
-   * Reads a subfolder under 'client/images/<playerFolder>' and returns an array of
-   * character objects. Each character object includes:
-   *   - id
-   *   - name
-   *   - image (URL path under /images/<playerFolder>)
-   *   - isGrayedOut = false (by default)
-   *
-   * @private
-   * @param {string} playerFolder - "tomas" or "nora"
-   * @returns {Array<Object>} An array of character objects for the given player.
-   */
-  #buildBoard(playerFolder) {
-    // Example path: .../client/images/tomas
-    const imagesDir = path.join(__dirname, '..', '..', 'client', 'images', playerFolder);
+  #buildBoard(folder) {
+    const directory = path.join(__dirname, '../../client/images', folder);
+    const files = fs.readdirSync(directory, { withFileTypes: true })
+      .filter(entry => entry.isFile() && /\.(png|jpe?g|gif|svg|webp)$/i.test(entry.name))
+      .map(entry => entry.name)
+      .sort();
+    if (!files.length) throw new Error(`No character images found for ${folder}.`);
 
-    let files;
-    try {
-      files = fs.readdirSync(imagesDir);
-    } catch (err) {
-      // If the folder doesn't exist or is unreadable, return an empty board
-      console.warn(`[Game] Warning: Could not read folder "${imagesDir}":`, err);
-      return [];
-    }
-
-    // Filter only typical image files, then sort them
-    files = files
-      .filter(file => /\.(png|jpe?g|gif|svg)$/i.test(file))
-      .sort((a, b) => a.localeCompare(b));
-
-    // Map to character objects
     return files.map((filename, index) => ({
       id: index + 1,
       name: path.basename(filename, path.extname(filename)),
-      image: `/images/${playerFolder}/${filename}`,
+      image: `/images/${folder}/${encodeURIComponent(filename)}`,
       isGrayedOut: false
     }));
   }
 
-  /**
-   * Randomly picks one character from the given board. Returns null if the board is empty.
-   *
-   * @private
-   * @param {Array<Object>} board - The array from which to pick a character.
-   * @returns {Object|null} A random character object, or null if the board is empty.
-   */
   #pickMystery(board) {
-    if (!board || board.length === 0) {
-      return null;
+    return { ...board[Math.floor(Math.random() * board.length)] };
+  }
+
+  #getPlayer(name) {
+    if (typeof name !== 'string' || !Object.hasOwn(this.#players, name)) {
+      throw new Error('playerName must be Tomas or Nora.');
     }
-    const randomIndex = Math.floor(Math.random() * board.length);
-    return board[randomIndex];
+    return this.#players[name];
   }
 
   /**
-   * Retrieves the board and mystery character for the specified player.
-   *
-   * @param {string} playerName - The player's name: "Tomas" or "Nora".
-   * @returns {{ board: Array<Object>, mysteryCharacter: Object|null }}
-   * An object containing the player's board array and their mystery character.
-   * @throws {Error} If playerName is neither "Tomas" nor "Nora".
+   * Return a snapshot so callers cannot change the game without making a move.
+   * @param {string} playerName - Tomas or Nora.
+   * @returns {{board: Object[], mysteryCharacter: Object}}
    */
   getPlayerState(playerName) {
-    switch (playerName) {
-      case 'Tomas':
-        return {
-          board: this.#tomasBoard,
-          mysteryCharacter: this.#tomasMystery
-        };
-      case 'Nora':
-        return {
-          board: this.#noraBoard,
-          mysteryCharacter: this.#noraMystery
-        };
-      default:
-        throw new Error(`Unknown player "${playerName}". Must be "Tomas" or "Nora".`);
-    }
+    const { board, mysteryCharacter } = this.#getPlayer(playerName);
+    return {
+      board: board.map(character => ({ ...character })),
+      mysteryCharacter: { ...mysteryCharacter }
+    };
   }
 
   /**
-   * Toggles the `isGrayedOut` flag for a character in the specified player's board.
-   * For example, if "Tomas" toggles ID=2, we flip `isGrayedOut` for ID=2 on Tomas's board.
-   *
-   * @param {string} playerName - The player's name: "Tomas" or "Nora".
-   * @param {number} characterId - The ID of the character to be toggled.
-   * @returns {void}
-   * @throws {Error} If the player name is invalid, or the character ID doesn’t exist on that board.
+   * @param {string} playerName - Tomas or Nora.
+   * @param {number} characterId - A positive integer from that player's board.
+   * @returns {boolean} The new gray-out state.
    */
   handleMove(playerName, characterId) {
-    let board;
-    if (playerName === 'Tomas') {
-      board = this.#tomasBoard;
-    } else if (playerName === 'Nora') {
-      board = this.#noraBoard;
-    } else {
-      throw new Error(`Invalid player name: "${playerName}"`);
+    const { board } = this.#getPlayer(playerName);
+    if (!Number.isSafeInteger(characterId) || characterId < 1) {
+      throw new Error('characterId must be a positive integer.');
     }
-
-    const charObj = board.find(c => c.id === characterId);
-    if (!charObj) {
-      throw new Error(`Character ${characterId} not found on ${playerName}'s board.`);
-    }
-
-    // Flip the isGrayedOut flag
-    charObj.isGrayedOut = !charObj.isGrayedOut;
+    const character = board.find(item => item.id === characterId);
+    if (!character) throw new Error(`Character ${characterId} not found on ${playerName}'s board.`);
+    character.isGrayedOut = !character.isGrayedOut;
+    return character.isGrayedOut;
   }
 }
 

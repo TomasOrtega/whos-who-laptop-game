@@ -2,37 +2,31 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Who’s Who? Tomas & Nora</title>
     <link rel="stylesheet" href="./css/style.css" />
+    <script src="./js/game.js" defer></script>
+    <script src="./js/app.js" defer></script>
   </head>
   <body>
     <header>
       <h1>Who’s Who? (Tomas & Nora)</h1>
     </header>
-
     <main>
-      <!-- Mystery Container -->
-      <section id="mystery-container" class="mystery-section">
-        <!-- Mystery card injected here -->
-      </section>
-
-      <!-- Game Board Container -->
-      <section id="game-container" class="game-section">
-        <!-- Player’s board injected here -->
-      </section>
-
-      <!-- Two player selection buttons, inside a single container -->
+      <p>Ask each other yes/no questions. Flip cards on your board to guess your opponent’s mystery.</p>
+      <p id="status" role="status" aria-live="polite">Choose a player to join the game.</p>
       <div id="player-buttons">
-        <button id="tomas-button" class="player-select-btn">Play as Tomas</button>
-        <button id="nora-button" class="player-select-btn">Play as Nora</button>
+        <button id="tomas-button" class="player-select-btn" type="button">Play as Tomas</button>
+        <button id="nora-button" class="player-select-btn" type="button">Play as Nora</button>
       </div>
+      <div id="game-controls" hidden>
+        <button id="new-game-button" class="player-select-btn" type="button">New game</button>
+      </div>
+      <section id="mystery-container" class="mystery-section" aria-label="Your mystery character" hidden></section>
+      <section id="game-container" class="game-section" aria-label="Your character board" hidden></section>
     </main>
-
     <footer>
-      <p>Tomas & Nora's Who's Who?</p>
+      <p>Tomas & Nora’s Who’s Who?</p>
     </footer>
-
-    <script src="./js/game.js"></script>
-    <script src="./js/app.js"></script>
   </body>
 </html>
