@@ -20,7 +20,7 @@
     "jest-environment-jsdom": "^30.5.2",
     "jsdoc": "^4.0.5",
     "supertest": "^7.3.2",
-    "@yao-pkg/pkg": "^6.25.0"
+    "@yao-pkg/pkg": "^6.26.0"
   },
   "pkg": {
     "scripts": [
